@@ -11,6 +11,27 @@
 - OpenAI API 키 설정 (`.env` 또는 환경 변수)
 - 3D FRONT scene JSON 파일
 
+### 🆕 방 단위 Trajectory 생성 (추천)
+
+**3D FRONT 데이터가 방 단위로만 있는 경우:**
+
+```bash
+# 단일 방에서 realistic trajectory 생성
+python scripts/generate_room_trajectory.py \
+    --room_json path/to/bedroom.json \
+    --output_dir data/bedroom/trajectories/ \
+    --num_trajectories 20 \
+    --strategy semantic
+
+# 그 다음 scene graph로 변환
+python scripts/convert_3dfront_to_dsg.py \
+    --input_json path/to/bedroom.json \
+    --output_dir data/bedroom/ \
+    --scene_id bedroom_001
+```
+
+**상세 가이드**: [docs/ROOM_TRAJECTORY_GENERATION.md](docs/ROOM_TRAJECTORY_GENERATION.md)
+
 ### 2. 한 번에 실행하기
 
 ```bash
@@ -52,7 +73,27 @@ python scripts/convert_3dfront_to_dsg.py \
 
 ### Step 2: Trajectory 생성
 
-#### Option A: Synthetic Trajectories
+#### Option A: 🆕 방 단위 Trajectory (추천 - 단일 방 데이터용)
+
+```bash
+python scripts/generate_room_trajectory.py \
+    --room_json path/to/3dfront_room.json \
+    --output_dir data/3dfront/scene_001/trajectories/ \
+    --num_trajectories 20 \
+    --num_interactions 5 \
+    --strategy semantic \
+    --split_at_interaction 2
+```
+
+**특징:**
+- 방 안의 가구 배치를 고려한 realistic 경로
+- 의미적으로 연관된 가구 순회 (sofa → coffee_table → tv)
+- 자동 past/future split (LP2 입력용)
+- 4가지 방문 전략: semantic, spatial, circular, random
+
+**상세**: [docs/ROOM_TRAJECTORY_GENERATION.md](docs/ROOM_TRAJECTORY_GENERATION.md)
+
+#### Option B: Scene Graph 기반 Synthetic Trajectories (다중 방 scene용)
 
 ```bash
 python scripts/generate_synthetic_trajectories.py \
@@ -63,7 +104,7 @@ python scripts/generate_synthetic_trajectories.py \
     --duration 180.0
 ```
 
-#### Option B: 기존 Trajectory 변환
+#### Option C: 기존 Trajectory 변환
 
 ```bash
 python scripts/convert_trajectory_to_lp2.py \
